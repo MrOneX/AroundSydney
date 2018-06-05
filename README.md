@@ -1,5 +1,5 @@
 
-## Around Sydney App
+# Around Sydney App
 
 The application made for show some location for users, allow retrieve locations from remote server and possible to storage location on the device.
 
@@ -16,4 +16,4 @@ Created with solutions on board:
 
 Project include unit test coverage with using jUnit and Mockito.
 
-# Enjoy with using Around Sydney App for free.
+### Enjoy with using Around Sydney App for free.
