@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Around Sydney</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="latitude">Latitude:</string>
+    <string name="longitude">Longitude:</string>
+
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCQ1cifa2kv3MY9rscQ0RfoAiox6pkhCYU</string>
+    <string name="distance">Distance:</string>
+    <string name="notes">Notes:</string>
+    <string name="add_new_location">Create new location</string>
+    <string name="location_name">Location name</string>
+    <string name="done">Done</string>
+
+</resources>
