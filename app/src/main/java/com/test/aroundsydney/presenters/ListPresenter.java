@@ -10,15 +10,12 @@ import com.test.aroundsydney.models.AppLocationModel;
 import com.test.aroundsydney.models.entitys.Location;
 import com.test.aroundsydney.views.LocationListView;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 
 @InjectViewState
@@ -32,12 +29,11 @@ public class ListPresenter extends MvpPresenter<LocationListView> {
 
     public List<Location> presenterCache;
 
-
     public ListPresenter() {
         AroundSydneyApplication.getAppComponent().inject(this);
     }
 
-    public ListPresenter(AppLocationModel locationModel){
+    public ListPresenter(AppLocationModel locationModel) {
         this.locationModel = locationModel;
     }
 
@@ -49,30 +45,15 @@ public class ListPresenter extends MvpPresenter<LocationListView> {
 
     @SuppressLint("CheckResult")
     public void requestLocations() {
-        final List<Location> locationsCache = new ArrayList<>();
-        Observable<List<Location>> observable = locationModel.getLocations();
-        observable.subscribe(new Consumer<List<Location>>() {
+        locationModel.getLocations().subscribe(new Consumer<List<Location>>() {
             @Override
             public void accept(List<Location> locations) {
-                locationsCache.addAll(locations);
-            }
-        }, new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) {
-
-            }
-        }, new Action() {
-            @Override
-            public void run() {
+                presenterCache = locations;
                 getViewState().clearList();
-                List<Location> filteredList = locationModel.filterLocationForDuplicate(locationsCache);
                 if (locationListener.myLocation != null) {
-                    List<Location> sortedCache = sortLocations(filteredList, locationListener.myLocation);
-                    getViewState().showListData(sortedCache);
-                    presenterCache = sortedCache;
+                    getViewState().showListData(sortLocations(locations, locationListener.myLocation));
                 } else {
-                    getViewState().showListData(filteredList);
-                    presenterCache = filteredList;
+                    getViewState().showListData(locations);
                 }
             }
         });

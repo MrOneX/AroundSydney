@@ -55,8 +55,6 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
             if (intent.getAction() != null) {
                 if (intent.getAction().equals(Constant.LOCATION_PERMISSION_GRANTED_EVENT)) {
                     enableMyLocation();
-                } else if (intent.getAction().equals(Constant.LOCATIONS_DATA_UPDATE_EVENT)) {
-                    mapPresenter.requestLocations();
                 }
             }
         }
@@ -67,7 +65,6 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         intentFilter.addAction(Constant.LOCATION_PERMISSION_GRANTED_EVENT);
-        intentFilter.addAction(Constant.LOCATIONS_DATA_UPDATE_EVENT);
         if (getContext() != null)
             LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
 

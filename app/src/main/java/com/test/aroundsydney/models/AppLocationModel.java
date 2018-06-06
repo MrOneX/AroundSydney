@@ -4,11 +4,11 @@ import com.test.aroundsydney.models.entitys.Location;
 
 import java.util.List;
 
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
 
 public interface AppLocationModel {
 
-    Observable<List<Location>> getLocations();
+    Flowable<List<Location>> getLocations();
 
     void createOrUpdateLocation(Location location);
 

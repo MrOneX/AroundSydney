@@ -40,8 +40,6 @@ public class LocationListFragment extends MvpAppCompatFragment implements Locati
             if (intent.getAction().equals(Constant.LOCATION_UPDATE_EVENT) ||
                     intent.getAction().equals(Constant.LOCATION_PERMISSION_GRANTED_EVENT)) {
                 listPresenter.updateLocationDistance();
-            } else if (intent.getAction().equals(Constant.LOCATIONS_DATA_UPDATE_EVENT)) {
-                listPresenter.requestLocations();
             }
         }
     };
@@ -52,7 +50,6 @@ public class LocationListFragment extends MvpAppCompatFragment implements Locati
         super.onCreate(savedInstanceState);
         intentFilter.addAction(Constant.LOCATION_UPDATE_EVENT);
         intentFilter.addAction(Constant.LOCATION_PERMISSION_GRANTED_EVENT);
-        intentFilter.addAction(Constant.LOCATIONS_DATA_UPDATE_EVENT);
         if (getContext() != null) {
             LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
         }

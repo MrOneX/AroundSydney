@@ -9,13 +9,23 @@ import com.test.aroundsydney.models.entitys.Location;
 
 import java.util.List;
 
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+
 @Dao
 public interface DaoAccess {
 
     @Query("SELECT * FROM Location")
-    List<Location> getAllLocations();
+    Flowable<List<Location>> getAllLocationsWithSubscription();
+
+    @Query("SELECT * FROM Location")
+    Maybe<List<Location>> getAllLocations();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertLocationOrReplace(Location location);
+
+    @Insert
+    void insertLocations(List<Location> location);
+
 
 }

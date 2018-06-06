@@ -6,9 +6,9 @@ import com.test.aroundsydney.common.AroundSydneyApplication;
 import com.test.aroundsydney.models.entitys.Location;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -23,14 +23,16 @@ public class LocalDBRepository {
                 .build();
     }
 
-    public Observable<List<Location>> getLocations() {
-        return Observable.fromCallable(new Callable<List<Location>>() {
-            @Override
-            public List<Location> call() {
-                return movieDatabase.daoAccess().getAllLocations();
-            }
-            //encapsulate multithreading in repository
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    public Flowable<List<Location>> getLocationsAndSubscribe() {
+        return movieDatabase.daoAccess().getAllLocationsWithSubscription()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Maybe<List<Location>> getLocations() {
+        return movieDatabase.daoAccess().getAllLocations()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
 
@@ -44,5 +46,14 @@ public class LocalDBRepository {
         }).start();
     }
 
+    public void saveLocations(final List<Location> locations) {
+        //encapsulate multithreading in repository
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                movieDatabase.daoAccess().insertLocations(locations);
+            }
+        }).start();
+    }
 
 }

@@ -13,17 +13,14 @@ import org.apache.commons.collections4.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
-import io.reactivex.functions.Action;
+import io.reactivex.Flowable;
 import io.reactivex.functions.Consumer;
 
 public class LocationModel implements AppLocationModel {
 
-    public Observable<List<Location>> fullDataObserver;
 
     @Inject
     AmazonRepository amazonRepository;
@@ -39,7 +36,7 @@ public class LocationModel implements AppLocationModel {
 
     public LocationModel() {
         AroundSydneyApplication.getAppComponent().inject(this);
-        requestAllLocations();
+        requestRemoteLocations();
     }
 
     public LocationModel(AmazonRepository amazonRepository, LocalDBRepository localDBRepository, AppLocationListener locationListener) {
@@ -50,56 +47,44 @@ public class LocationModel implements AppLocationModel {
 
 
     @SuppressLint("CheckResult")
-    public Observable<List<Location>> requestAllLocations() {
-        isRemoteLocationLoading = true;
-        locationsCache.clear();
-
-        fullDataObserver = localDBRepository
-                .getLocations()
-                .mergeWith(amazonRepository.getLocations());
-
-        fullDataObserver.subscribe(new Consumer<List<Location>>() {
+    private void requestRemoteLocations() {
+        amazonRepository.getLocations().subscribe(new Consumer<List<Location>>() {
             @Override
             public void accept(List<Location> locations) {
-                // save all retrieved location to cache
-                locationsCache.addAll(locations);
-            }
-        }, new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) {
-
-            }
-        }, new Action() {
-            @Override
-            public void run() {
-                // on complete loading all data
-                isRemoteLocationLoading = false;
-                isDataChanged = false;
+                mergeLocations(locations);
             }
         });
-        return fullDataObserver;
+    }
+
+
+    @SuppressLint("CheckResult")
+    private void mergeLocations(final List<Location> remoteLocations) {
+        localDBRepository.getLocations().subscribe(new Consumer<List<Location>>() {
+            @Override
+            public void accept(List<Location> localLocations) {
+                if (!localLocations.isEmpty()) {
+                    for (Location remoteItem : remoteLocations) {
+                        boolean isFounded = false;
+                        for (Location localItem : localLocations) {
+                            if (isLocationsEqual(localItem, remoteItem)) {
+                                isFounded = true;
+                            }
+                        }
+                        if(!isFounded){
+                            localDBRepository.saveLocation(remoteItem);
+                        }
+                    }
+                } else {
+                    localDBRepository.saveLocations(remoteLocations);
+                }
+            }
+        });
     }
 
 
     @Override
-    public Observable<List<Location>> getLocations() {
-        if (isRemoteLocationLoading) {
-            // return already created observer for retrieve all locations
-            return fullDataObserver;
-        } else {
-            if (isDataChanged) {
-                // locations data updated, request all again
-                return requestAllLocations();
-            } else {
-                // data was loaded to cache and no changes after, return cached data
-                return Observable.fromCallable(new Callable<List<Location>>() {
-                    @Override
-                    public List<Location> call() {
-                        return locationsCache;
-                    }
-                });
-            }
-        }
+    public Flowable<List<Location>> getLocations() {
+        return localDBRepository.getLocationsAndSubscribe();
     }
 
 
@@ -116,6 +101,7 @@ public class LocationModel implements AppLocationModel {
                 location1.longitude == location2.longitude &&
                 location1.latitude == location2.latitude);
     }
+
 
     @Override
     public List<Location> filterLocationForDuplicate(final List<Location> locations) {

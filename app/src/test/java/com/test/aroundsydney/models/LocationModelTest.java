@@ -46,12 +46,12 @@ public class LocationModelTest {
     @Test
     public void test_requestAllLocations() {
         when(mockedAmazonRepository.getLocations()).thenReturn(Observable.<List<Location>>empty());
-        when(mockedLocalRepository.getLocations()).thenReturn(Observable.<List<Location>>empty());
+        when(mockedLocalRepository.getLocationsAndSubscribe()).thenReturn(Observable.<List<Location>>empty());
 
-        locationModel.requestAllLocations();
+        locationModel.requestRemoteLocations();
 
         verify(mockedAmazonRepository).getLocations();
-        verify(mockedLocalRepository).getLocations();
+        verify(mockedLocalRepository).getLocationsAndSubscribe();
 
         assertFalse(locationModel.isDataChanged);
         assertFalse(locationModel.isRemoteLocationLoading);
