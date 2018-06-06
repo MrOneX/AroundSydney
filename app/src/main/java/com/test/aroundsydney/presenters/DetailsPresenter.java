@@ -1,13 +1,11 @@
 package com.test.aroundsydney.presenters;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
 
 import com.arellomobile.mvp.MvpPresenter;
 import com.test.aroundsydney.common.AroundSydneyApplication;
+import com.test.aroundsydney.common.Utils;
 import com.test.aroundsydney.models.AppLocationModel;
 import com.test.aroundsydney.models.entitys.Location;
 import com.test.aroundsydney.views.DetailsView;
@@ -29,18 +27,23 @@ public class DetailsPresenter extends MvpPresenter<DetailsView> {
     @Inject
     Context context;
 
+    @Inject
+    Utils utils;
+
     public DetailsPresenter() {
         AroundSydneyApplication.getAppComponent().inject(this);
     }
 
-    public DetailsPresenter(AppLocationModel locationModel) {
+    public DetailsPresenter(AppLocationModel locationModel, ReactiveLocationProvider locationProvider, Context context, Utils utils) {
         this.locationModel = locationModel;
+        this.locationProvider = locationProvider;
+        this.context = context;
+        this.utils = utils;
     }
 
     @SuppressLint("CheckResult")
     public Observable<Float> getDistanceForLocation(final Location location) {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (utils.checkLocationPermission(context)) {
             return locationProvider.getLastKnownLocation()
                     .map(new Function<android.location.Location, Float>() {
                         @Override
@@ -56,6 +59,7 @@ public class DetailsPresenter extends MvpPresenter<DetailsView> {
     public void updateLocationData(Location location) {
         locationModel.createOrUpdateLocation(location);
     }
+
 
     private Float calculateDistanceBetweenMyLocations(Location location, android.location.Location myLocation) {
         float[] result1 = new float[3];

@@ -2,6 +2,7 @@ package com.test.aroundsydney.common.di.modules;
 
 import android.content.Context;
 
+import com.google.android.gms.location.LocationRequest;
 import com.test.aroundsydney.models.AppLocationModel;
 import com.test.aroundsydney.models.LocationModel;
 
@@ -16,15 +17,22 @@ public class LocationModule {
 
     @Singleton
     @Provides
-    public AppLocationModel provideLocationModel() {
+    AppLocationModel provideLocationModel() {
         return new LocationModel();
     }
 
     @Singleton
     @Provides
-    public ReactiveLocationProvider provideReactiveLocationProvider(Context context) {
+    ReactiveLocationProvider provideReactiveLocationProvider(Context context) {
         return new ReactiveLocationProvider(context);
     }
 
+    @Singleton
+    @Provides
+    LocationRequest provideLocationRequest() {
+        return LocationRequest.create() //standard GMS LocationRequest
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(60 * 1000);
 
+    }
 }

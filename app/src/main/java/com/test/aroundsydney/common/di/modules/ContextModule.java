@@ -2,6 +2,8 @@ package com.test.aroundsydney.common.di.modules;
 
 import android.content.Context;
 
+import com.test.aroundsydney.common.Utils;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -17,7 +19,13 @@ public class ContextModule {
 
     @Provides
     @Singleton
-    public Context provideContext() {
+    Context provideContext() {
         return mContext;
+    }
+
+    @Provides
+    @Singleton
+    Utils provideUtils() {
+        return new Utils();
     }
 }

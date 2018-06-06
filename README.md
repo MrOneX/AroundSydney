@@ -16,4 +16,8 @@ Created with solutions on board:
 
 Project include unit test coverage with using jUnit and Mockito.
 
-### Enjoy with using Around Sydney App for free.
+Usage hints:
+- to creating a new location perform a long click on the map and enter the new location name
+- for go to location details screen just tap to the name of this pin on the map or select item on the list
+
+#### Enjoy with using Around Sydney App for free.

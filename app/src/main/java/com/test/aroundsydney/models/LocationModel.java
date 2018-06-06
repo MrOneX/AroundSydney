@@ -20,6 +20,7 @@ public class LocationModel implements AppLocationModel {
 
     @Inject
     AmazonRepository amazonRepository;
+
     @Inject
     LocalDBRepository localDBRepository;
 
@@ -36,7 +37,7 @@ public class LocationModel implements AppLocationModel {
 
 
     @SuppressLint("CheckResult")
-    private void requestRemoteLocations() {
+    void requestRemoteLocations() {
         Observable<List<Location>> observer = amazonRepository.getLocations();
         if (observer != null) {
             observer.subscribe(new Consumer<List<Location>>() {
@@ -50,30 +51,37 @@ public class LocationModel implements AppLocationModel {
 
 
     @SuppressLint("CheckResult")
-    private void mergeLocations(final List<Location> remoteLocations) {
-        localDBRepository.getLocations().subscribe(new Consumer<List<Location>>() {
-            @Override
-            public void accept(List<Location> localLocations) {
-                if (!localLocations.isEmpty()) {
-                    for (Location remoteItem : remoteLocations) {
-                        boolean isFounded = false;
-                        for (Location localItem : localLocations) {
-                            if (isLocationsEqual(localItem, remoteItem)) {
-                                isFounded = true;
-                            }
-                        }
-                        if (!isFounded) {
-                            localDBRepository.saveLocation(remoteItem);
-                        }
+    void mergeLocations(final List<Location> remoteLocations) {
+        localDBRepository.getLocations()
+                .subscribe(new Consumer<List<Location>>() {
+                    @Override
+                    public void accept(List<Location> localLocations) {
+                        addToLocalRepositoryIfNotExist(localLocations, remoteLocations);
                     }
-                } else {
-                    localDBRepository.saveLocations(remoteLocations);
-                }
-            }
-        });
+                });
     }
 
-    private boolean isLocationsEqual(Location location1, Location location2) {
+
+    void addToLocalRepositoryIfNotExist(List<Location> localLocations, final List<Location> remoteLocations) {
+        if (!localLocations.isEmpty()) {
+            for (Location remoteItem : remoteLocations) {
+                boolean isFounded = false;
+                for (Location localItem : localLocations) {
+                    if (isLocationsEqual(localItem, remoteItem)) {
+                        isFounded = true;
+                    }
+                }
+                if (!isFounded) {
+                    localDBRepository.saveLocation(remoteItem);
+                }
+            }
+        } else {
+            localDBRepository.saveLocations(remoteLocations);
+        }
+    }
+
+
+    boolean isLocationsEqual(Location location1, Location location2) {
         return (location1.name.equals(location2.name) &&
                 location1.longitude == location2.longitude &&
                 location1.latitude == location2.latitude);
@@ -88,7 +96,6 @@ public class LocationModel implements AppLocationModel {
 
     @Override
     public void createOrUpdateLocation(Location location) {
-        location.isItemFromRemote = false;
         localDBRepository.saveLocation(location);
     }
 

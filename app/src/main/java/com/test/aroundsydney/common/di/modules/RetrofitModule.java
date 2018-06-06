@@ -18,13 +18,13 @@ public class RetrofitModule {
 
     @Provides
     @Singleton
-    public Retrofit provideRetrofit(Retrofit.Builder builder) {
+    Retrofit provideRetrofit(Retrofit.Builder builder) {
         return builder.baseUrl("http://bit.ly").build();
     }
 
     @Provides
     @Singleton
-    public Retrofit.Builder provideRetrofitBuilder(Converter.Factory converterFactory) {
+    Retrofit.Builder provideRetrofitBuilder(Converter.Factory converterFactory) {
         return new Retrofit.Builder()
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
                 .addConverterFactory(converterFactory);
@@ -32,13 +32,13 @@ public class RetrofitModule {
 
     @Provides
     @Singleton
-    public Converter.Factory provideConverterFactory(Gson gson) {
+    Converter.Factory provideConverterFactory(Gson gson) {
         return GsonConverterFactory.create(gson);
     }
 
     @Provides
     @Singleton
-    public Gson provideGson() {
+    Gson provideGson() {
         return new GsonBuilder()
                 .setPrettyPrinting()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")

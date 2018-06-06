@@ -43,9 +43,6 @@ public class AmazonRepository {
                         .map(new Function<AmazonLocationResponse, List<Location>>() {
                             @Override
                             public List<Location> apply(AmazonLocationResponse locationResponse) {
-                                for (Location item : locationResponse.locations) {
-                                    item.isItemFromRemote = true;
-                                }
                                 amazonLocationResponse = locationResponse;
                                 return amazonLocationResponse.locations;
                             }

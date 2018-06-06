@@ -27,8 +27,6 @@ public class Location implements Serializable {
 
     public float distance = 0;
 
-    public boolean isItemFromRemote;
-
 
     public Location(String name, double latitude, double longitude) {
         this.name = name;

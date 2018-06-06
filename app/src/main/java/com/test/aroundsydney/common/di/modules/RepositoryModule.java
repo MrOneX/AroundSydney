@@ -18,20 +18,20 @@ public class RepositoryModule {
     @Singleton
     @NonNull
     @Provides
-    public LocalDBRepository provideDBRepository() {
+    LocalDBRepository provideDBRepository() {
         return new LocalDBRepository();
     }
 
     @Singleton
     @NonNull
     @Provides
-    public AmazonRepository provideAmazonRepository() {
+    AmazonRepository provideAmazonRepository() {
         return new AmazonRepository();
     }
 
     @Provides
     @Singleton
-    public AmazonRepositoryApi provideAmazonRepositoryApi(Retrofit retrofit) {
+    AmazonRepositoryApi provideAmazonRepositoryApi(Retrofit retrofit) {
         return retrofit.create(AmazonRepositoryApi.class);
     }
 }

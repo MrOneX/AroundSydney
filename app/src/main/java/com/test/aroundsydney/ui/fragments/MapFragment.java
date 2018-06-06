@@ -87,16 +87,17 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
             return;
         mMap.clear();
         locationsOnMap.clear();
+        Utils utils = new Utils();
         for (Location item : locations) {
             locationsOnMap.add(item);
-            mMap.addMarker(prepareMarkerOptions(item));
+            mMap.addMarker(prepareMarkerOptions(item, utils));
         }
     }
 
     @Override
     public void addPin(Location location) {
         locationsOnMap.add(location);
-        mMap.addMarker(prepareMarkerOptions(location));
+        mMap.addMarker(prepareMarkerOptions(location, new Utils()));
     }
 
 
@@ -131,12 +132,12 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
         });
     }
 
-    private MarkerOptions prepareMarkerOptions(Location location) {
+    private MarkerOptions prepareMarkerOptions(Location location, Utils utils) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.draggable(false);
         markerOptions.title(location.name);
         markerOptions.position(new LatLng(location.latitude, location.longitude));
-        markerOptions.icon(Utils.bitmapDescriptorFromVector(getContext(), R.drawable.ic_pin));
+        markerOptions.icon(utils.bitmapDescriptorFromVector(getContext(), R.drawable.ic_pin));
         return markerOptions;
     }
 
