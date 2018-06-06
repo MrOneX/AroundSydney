@@ -1,6 +1,5 @@
 package com.test.aroundsydney.presenters;
 
-import com.test.aroundsydney.common.AppLocationListener;
 import com.test.aroundsydney.models.LocationModel;
 import com.test.aroundsydney.models.entitys.Location;
 import com.test.aroundsydney.views.LocationListView;

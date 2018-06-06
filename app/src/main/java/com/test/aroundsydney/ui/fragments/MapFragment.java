@@ -29,11 +29,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.test.aroundsydney.R;
-import com.test.aroundsydney.common.Constant;
 import com.test.aroundsydney.common.Utils;
 import com.test.aroundsydney.models.entitys.Location;
 import com.test.aroundsydney.presenters.MapPresenter;
 import com.test.aroundsydney.ui.activities.LocationDetailsActivity;
+import com.test.aroundsydney.ui.activities.MainActivity;
 import com.test.aroundsydney.views.MapView;
 
 import java.util.ArrayList;
@@ -48,13 +48,14 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
     private GoogleMap mMap;
     private List<Location> locationsOnMap = new ArrayList<>();
 
-    IntentFilter intentFilter = new IntentFilter(Constant.LOCATION_PERMISSION_GRANTED_EVENT);
+    IntentFilter intentFilter = new IntentFilter(MainActivity.LOCATION_PERMISSION_GRANTED_EVENT);
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction() != null) {
-                if (intent.getAction().equals(Constant.LOCATION_PERMISSION_GRANTED_EVENT)) {
-                    enableMyLocation();
+            if (mMap != null) {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                        ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    mMap.setMyLocationEnabled(true);
                 }
             }
         }
@@ -64,11 +65,12 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        intentFilter.addAction(Constant.LOCATION_PERMISSION_GRANTED_EVENT);
-        if (getContext() != null)
+        if (getContext() != null) {
             LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
+        }
 
     }
+
 
     @Nullable
     @Override
@@ -114,7 +116,7 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
                     for (Location item : locationsOnMap) {
                         if (item.name.equals(marker.getTitle())) {
                             Intent intent = new Intent(getActivity(), LocationDetailsActivity.class);
-                            intent.putExtra(Constant.LOCATION_DETAILS_EXTRA_KEY, item);
+                            intent.putExtra(LocationDetailsActivity.LOCATION_DETAILS_EXTRA_KEY, item);
                             startActivity(intent);
                             return;
                         }
@@ -157,7 +159,6 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
                             EditText editText = dialog.getInputEditText();
                             if (editText != null) {
                                 mapPresenter.addCustomLocation(latLng, editText.getText().toString());
-                                LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(Constant.LOCATIONS_DATA_UPDATE_EVENT));
                             }
                         }
                     })
@@ -175,19 +176,20 @@ public class MapFragment extends MvpAppCompatFragment implements MapView, OnMapR
     }
 
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (getContext() != null)
-            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(broadcastReceiver);
-    }
-
     private void enableMyLocation() {
         if (getContext() != null && mMap != null) {
             if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                     || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
             }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getContext() != null) {
+            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(broadcastReceiver);
         }
     }
 }

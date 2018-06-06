@@ -3,7 +3,6 @@ package com.test.aroundsydney.ui.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
@@ -16,29 +15,24 @@ import android.support.v4.view.ViewPager;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.test.aroundsydney.R;
-import com.test.aroundsydney.common.AppLocationListener;
 import com.test.aroundsydney.common.AroundSydneyApplication;
-import com.test.aroundsydney.common.Constant;
 import com.test.aroundsydney.ui.fragments.LocationListFragment;
 import com.test.aroundsydney.ui.fragments.MapFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 public class MainActivity extends MvpAppCompatActivity {
 
-
-    @Inject
-    AppLocationListener locationListener;
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 100;
+    public static final String LOCATION_PERMISSION_GRANTED_EVENT = "LOCATION_PERMISSION_GRANTED_EVENT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         AroundSydneyApplication.getAppComponent().inject(this);
-        initAppLocationListener();
+        checkLocationPermission();
 
         ViewPager viewPager = findViewById(R.id.viewpager);
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -59,43 +53,23 @@ public class MainActivity extends MvpAppCompatActivity {
 
     }
 
-    private boolean checkLocationPermission() {
+    private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    Constant.MY_PERMISSIONS_REQUEST_LOCATION);
-            return false;
-        } else {
-            return true;
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
-            case Constant.MY_PERMISSIONS_REQUEST_LOCATION: {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
-                    initAppLocationListener();
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(LOCATION_PERMISSION_GRANTED_EVENT));
                 }
-            }
-        }
-    }
-
-    private void initAppLocationListener() {
-        //init location listener
-        if (checkLocationPermission()) {
-            LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            if (mLocationManager != null) {
-                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, Constant.LOCATION_REFRESH_TIME,
-                        Constant.LOCATION_REFRESH_DISTANCE, locationListener);
-
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Constant.LOCATION_REFRESH_TIME,
-                        Constant.LOCATION_REFRESH_DISTANCE, locationListener);
-                locationListener.myLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(Constant.LOCATION_PERMISSION_GRANTED_EVENT));
             }
         }
     }

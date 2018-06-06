@@ -1,5 +1,6 @@
 package com.test.aroundsydney.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -9,15 +10,18 @@ import android.widget.TextView;
 import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.test.aroundsydney.R;
-import com.test.aroundsydney.common.Constant;
 import com.test.aroundsydney.models.entitys.Location;
 import com.test.aroundsydney.presenters.DetailsPresenter;
 import com.test.aroundsydney.views.DetailsView;
 
 import java.util.Locale;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+
 public class LocationDetailsActivity extends MvpAppCompatActivity implements DetailsView {
 
+    public static final String LOCATION_DETAILS_EXTRA_KEY = "LOCATION_DETAILS_EXTRA_KEY";
 
     @InjectPresenter
     DetailsPresenter detailsPresenter;
@@ -30,6 +34,7 @@ public class LocationDetailsActivity extends MvpAppCompatActivity implements Det
     private TableRow tableRowDistance;
     private Location location;
 
+    @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,12 +48,20 @@ public class LocationDetailsActivity extends MvpAppCompatActivity implements Det
         tableRowDistance = findViewById(R.id.table_row_distance);
 
         if (getIntent().getExtras() != null) {
-            location = (Location) getIntent().getExtras().getSerializable(Constant.LOCATION_DETAILS_EXTRA_KEY);
+            location = (Location) getIntent().getExtras().getSerializable(LOCATION_DETAILS_EXTRA_KEY);
             if (location != null) {
-                if (location.distance == 0) {
-                    location.distance = detailsPresenter.getDistanceForLocation(location);
+                Observable<Float> observer = detailsPresenter.getDistanceForLocation(location);
+                if (observer != null) {
+                    observer.subscribe(new Consumer<Float>() {
+                        @Override
+                        public void accept(Float aFloat) {
+                            location.distance = aFloat;
+                            insertDataToViews(location);
+                        }
+                    });
+                } else {
+                    insertDataToViews(location);
                 }
-                insertDataToViews(location);
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.test.aroundsydney.models;
 
-import com.test.aroundsydney.common.AppLocationListener;
 import com.test.aroundsydney.models.entitys.Location;
 import com.test.aroundsydney.models.repositories.local.LocalDBRepository;
 import com.test.aroundsydney.models.repositories.remote.AmazonRepository;

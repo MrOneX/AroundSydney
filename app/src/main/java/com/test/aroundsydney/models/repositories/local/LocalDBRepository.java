@@ -1,11 +1,14 @@
 package com.test.aroundsydney.models.repositories.local;
 
 import android.arch.persistence.room.Room;
+import android.content.Context;
 
 import com.test.aroundsydney.common.AroundSydneyApplication;
 import com.test.aroundsydney.models.entitys.Location;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
@@ -14,13 +17,15 @@ import io.reactivex.schedulers.Schedulers;
 
 public class LocalDBRepository {
 
+    @Inject
+    Context context;
+
     private static final String DATABASE_NAME = "LOCATION_DB";
     private LocationDatabase movieDatabase;
 
     public LocalDBRepository() {
-        movieDatabase = Room.databaseBuilder(AroundSydneyApplication.getAppComponent().getContext(),
-                LocationDatabase.class, DATABASE_NAME)
-                .build();
+        AroundSydneyApplication.getAppComponent().inject(this);
+        movieDatabase = Room.databaseBuilder(context, LocationDatabase.class, DATABASE_NAME).build();
     }
 
     public Flowable<List<Location>> getLocationsAndSubscribe() {

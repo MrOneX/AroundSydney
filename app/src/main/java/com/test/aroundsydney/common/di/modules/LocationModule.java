@@ -1,6 +1,7 @@
 package com.test.aroundsydney.common.di.modules;
 
-import com.test.aroundsydney.common.AppLocationListener;
+import android.content.Context;
+
 import com.test.aroundsydney.models.AppLocationModel;
 import com.test.aroundsydney.models.LocationModel;
 
@@ -8,6 +9,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import pl.charmas.android.reactivelocation2.ReactiveLocationProvider;
 
 @Module
 public class LocationModule {
@@ -20,8 +22,8 @@ public class LocationModule {
 
     @Singleton
     @Provides
-    public AppLocationListener provideLocationListener() {
-        return new AppLocationListener();
+    public ReactiveLocationProvider provideReactiveLocationProvider(Context context) {
+        return new ReactiveLocationProvider(context);
     }
 
 

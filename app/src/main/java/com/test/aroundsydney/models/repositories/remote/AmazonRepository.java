@@ -1,5 +1,9 @@
 package com.test.aroundsydney.models.repositories.remote;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import com.test.aroundsydney.common.AroundSydneyApplication;
 import com.test.aroundsydney.models.entitys.AmazonLocationResponse;
 import com.test.aroundsydney.models.entitys.Location;
@@ -20,6 +24,9 @@ public class AmazonRepository {
     @Inject
     public AmazonRepositoryApi amazonRepositoryApi;
 
+    @Inject
+    Context context;
+
     public AmazonRepository() {
         AroundSydneyApplication.getAppComponent().inject(this);
     }
@@ -28,29 +35,38 @@ public class AmazonRepository {
     private AmazonLocationResponse amazonLocationResponse;
 
     public Observable<List<Location>> getLocations() {
-
-        if (amazonLocationResponse == null) {
-            return amazonRepositoryApi.getLocations()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .map(new Function<AmazonLocationResponse, List<Location>>() {
-                        @Override
-                        public List<Location> apply(AmazonLocationResponse locationResponse) {
-                            for (Location item : locationResponse.locations) {
-                                item.isItemFromRemote = true;
+        if (isOnline()) {
+            if (amazonLocationResponse == null) {
+                return amazonRepositoryApi.getLocations()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .map(new Function<AmazonLocationResponse, List<Location>>() {
+                            @Override
+                            public List<Location> apply(AmazonLocationResponse locationResponse) {
+                                for (Location item : locationResponse.locations) {
+                                    item.isItemFromRemote = true;
+                                }
+                                amazonLocationResponse = locationResponse;
+                                return amazonLocationResponse.locations;
                             }
-                            amazonLocationResponse = locationResponse;
-                            return amazonLocationResponse.locations;
-                        }
-                    });
+                        });
+            } else {
+                return Observable.fromCallable(new Callable<List<Location>>() {
+                    @Override
+                    public List<Location> call() {
+                        return amazonLocationResponse.locations;
+                    }
+                });
+            }
         } else {
-            return Observable.fromCallable(new Callable<List<Location>>() {
-                @Override
-                public List<Location> call() {
-                    return amazonLocationResponse.locations;
-                }
-            });
+            return null;
         }
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
 }

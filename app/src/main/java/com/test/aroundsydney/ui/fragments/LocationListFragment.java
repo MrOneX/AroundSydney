@@ -17,10 +17,10 @@ import android.view.ViewGroup;
 import com.arellomobile.mvp.MvpAppCompatFragment;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.test.aroundsydney.R;
-import com.test.aroundsydney.common.Constant;
 import com.test.aroundsydney.models.entitys.Location;
 import com.test.aroundsydney.presenters.ListPresenter;
 import com.test.aroundsydney.ui.activities.LocationDetailsActivity;
+import com.test.aroundsydney.ui.activities.MainActivity;
 import com.test.aroundsydney.ui.adapters.LocationListAdapter;
 import com.test.aroundsydney.views.LocationListView;
 
@@ -32,15 +32,12 @@ public class LocationListFragment extends MvpAppCompatFragment implements Locati
     ListPresenter listPresenter;
 
     private LocationListAdapter adapter;
-    IntentFilter intentFilter = new IntentFilter();
+    IntentFilter intentFilter = new IntentFilter(MainActivity.LOCATION_PERMISSION_GRANTED_EVENT);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Constant.LOCATION_UPDATE_EVENT) ||
-                    intent.getAction().equals(Constant.LOCATION_PERMISSION_GRANTED_EVENT)) {
-                listPresenter.updateLocationDistance();
-            }
+            listPresenter.initMyLocationProvider();
         }
     };
 
@@ -48,8 +45,6 @@ public class LocationListFragment extends MvpAppCompatFragment implements Locati
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        intentFilter.addAction(Constant.LOCATION_UPDATE_EVENT);
-        intentFilter.addAction(Constant.LOCATION_PERMISSION_GRANTED_EVENT);
         if (getContext() != null) {
             LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
         }
@@ -71,7 +66,7 @@ public class LocationListFragment extends MvpAppCompatFragment implements Locati
             @Override
             public void onItemClick(Location location) {
                 Intent intent = new Intent(getActivity(), LocationDetailsActivity.class);
-                intent.putExtra(Constant.LOCATION_DETAILS_EXTRA_KEY, location);
+                intent.putExtra(LocationDetailsActivity.LOCATION_DETAILS_EXTRA_KEY, location);
                 startActivity(intent);
             }
         });

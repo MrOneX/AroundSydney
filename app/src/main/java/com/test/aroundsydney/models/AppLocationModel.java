@@ -12,9 +12,4 @@ public interface AppLocationModel {
 
     void createOrUpdateLocation(Location location);
 
-    float calculateDistanceBetweenMyLocations(Location location);
-
-    List<Location> filterLocationForDuplicate(List<Location> locations);
-
-
 }
